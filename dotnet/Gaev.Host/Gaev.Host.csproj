@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\features\Gaev.User.Contracts\Gaev.User.Contracts.csproj" />
+    <ProjectReference Include="..\features\Gaev.Currency.Contracts\Gaev.Currency.Contracts.csproj" />
+    <ProjectReference Include="..\features\Gaev.Dashboard.Contracts\Gaev.Dashboard.Contracts.csproj" />
+    <ProjectReference Include="..\features\Gaev.User.Impl\Gaev.User.Impl.csproj" />
+    <ProjectReference Include="..\features\Gaev.Currency.Impl\Gaev.Currency.Impl.csproj" />
+    <ProjectReference Include="..\features\Gaev.Dashboard.Impl\Gaev.Dashboard.Impl.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
