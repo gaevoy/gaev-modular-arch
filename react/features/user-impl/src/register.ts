@@ -1,8 +1,12 @@
 import type { ComponentType } from 'react';
 import { container } from '@gaev/container';
 import {
-  USER_SERVICE, USER_AVATAR, USE_CURRENT_USER,
-  type IUserService, type UserAvatarProps, type UseCurrentUser,
+  USER_SERVICE,
+  USER_AVATAR,
+  USE_CURRENT_USER,
+  type IUserService,
+  type UserAvatarProps,
+  type UseCurrentUser,
 } from '@gaev/user-contract';
 import { UserService } from './UserService';
 import UserAvatar from './UserAvatar';

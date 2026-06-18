@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { container } from '@gaev/container';
-import { USER_SERVICE, type IUserService, type IUser } from '@gaev/user-contract';
+import {
+  USER_SERVICE,
+  type IUserService,
+  type IUser
+} from '@gaev/user-contract';
 
 export default function useCurrentUser(): { user: IUser | null; loading: boolean } {
   const [user, setUser] = useState<IUser | null>(null);

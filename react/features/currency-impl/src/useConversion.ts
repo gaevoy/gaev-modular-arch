@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { container } from '@gaev/container';
-import { CURRENCY_SERVICE, type ICurrencyService, type IConversionResult, type CurrencyCode } from '@gaev/currency-contract';
+import {
+  CURRENCY_SERVICE,
+  type ICurrencyService,
+  type IConversionResult,
+  type CurrencyCode,
+  type UseConversion
+} from '@gaev/currency-contract';
 
-export default function useConversion(amount: number, from: CurrencyCode, to: CurrencyCode): { result: IConversionResult | null; loading: boolean } {
+export default function useConversion(amount: number, from: CurrencyCode, to: CurrencyCode)
+  : ReturnType<UseConversion> {
   const [result, setResult] = useState<IConversionResult | null>(null);
   const [loading, setLoading] = useState(true);
 

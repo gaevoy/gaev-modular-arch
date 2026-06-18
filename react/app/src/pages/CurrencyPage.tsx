@@ -1,6 +1,9 @@
 import type { ComponentType } from 'react';
 import { resolveAsync } from '@gaev/container';
-import { CURRENCY_INPUT, type CurrencyInputProps } from '@gaev/currency-contract';
+import {
+  CURRENCY_INPUT,
+  type CurrencyInputProps
+} from '@gaev/currency-contract';
 
 const CurrencyInput = await resolveAsync<ComponentType<CurrencyInputProps>>(CURRENCY_INPUT);
 

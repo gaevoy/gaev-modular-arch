@@ -29,7 +29,7 @@ The IoC container. Wraps inversify's `Container` and adds two functions: `regist
 - Exported API surface: `container`, `registerBundle`, `resolveAsync`, `injectable`, `inject`
 
 ### Contract packages (`*-contract`)
-Pure TypeScript. Define what a feature _is_ — interfaces, abstract classes, props interfaces, hook types, and IoC symbols. Nothing else.
+Pure TypeScript. Define what a feature _is_ — service interfaces, props interfaces, hook types, and IoC symbols. Nothing else.
 
 **Rules:**
 - Zero `@gaev/*` dependencies
@@ -108,7 +108,7 @@ inversify bindings use `toDynamicValue` / `toConstantValue` — no decorators, n
 | What | Example |
 |---|---|
 | Data interface | `interface IUser { id: string; name: string; avatarUrl: string; }` |
-| Abstract service | `abstract class IUserService { abstract getCurrentUser(): Promise<IUser>; }` |
+| Service interface | `interface IUserService { getCurrentUser(): Promise<IUser>; }` |
 | Props interface | `interface UserAvatarProps { userId: string; size?: 'sm' \| 'md' \| 'lg'; }` |
 | Hook type | `type UseCurrentUser = () => { user: IUser \| null; loading: boolean }` |
 | IoC symbol | `const USER_SERVICE = Symbol.for('@gaev/user/USER_SERVICE')` |
@@ -230,7 +230,7 @@ Open the Network tab, filter by JS, then navigate:
 
 ## How to Add a New Feature
 
-1. **Create `features/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../tsconfig.base.json`, and `src/` with interfaces, an abstract class, props types, a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`.
+1. **Create `features/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../tsconfig.base.json`, and `src/` with service interfaces, props types, a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`.
 
 2. **Create `features/my-feature-impl/`** — add `package.json` (deps: `@gaev/container`, `@gaev/my-feature-contract`, `react`), `tsconfig.json`, and `src/` with concrete implementations. Write `register.ts` that calls `container.bind(...)` for each symbol. Write `index.ts` with a single `import './register'`.
 

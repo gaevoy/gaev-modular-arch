@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import type { ComponentType } from 'react';
+import React, { useState, useEffect, type ComponentType } from 'react';
 import { resolveAsync } from '@gaev/container';
-import { USER_AVATAR, USER_SERVICE, type UserAvatarProps, type IUserService, type IUser } from '@gaev/user-contract';
-import { CURRENCY_SERVICE, type ICurrencyService, type IConversionResult } from '@gaev/currency-contract';
+import {
+  USER_AVATAR,
+  USER_SERVICE,
+  type UserAvatarProps,
+  type IUserService,
+  type IUser
+} from '@gaev/user-contract';
+import {
+  CURRENCY_SERVICE,
+  type ICurrencyService,
+  type IConversionResult
+} from '@gaev/currency-contract';
 import type { DashboardWidgetProps } from '@gaev/dashboard-contract';
 
 const [UserAvatar, userService, currencyService] = await Promise.all([
@@ -12,7 +21,7 @@ const [UserAvatar, userService, currencyService] = await Promise.all([
 ]);
 
 export const DashboardWidget: React.FC<DashboardWidgetProps> = ({ defaultAmount = 100 }) => {
-  const [user, setUser]             = useState<IUser | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [conversion, setConversion] = useState<IConversionResult | null>(null);
 
   useEffect(() => {

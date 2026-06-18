@@ -1,8 +1,12 @@
 import type { ComponentType } from 'react';
 import { container } from '@gaev/container';
 import {
-  DASHBOARD_SERVICE, DASHBOARD_WIDGET, USE_DASHBOARD,
-  type IDashboardService, type DashboardWidgetProps, type UseDashboard,
+  DASHBOARD_SERVICE,
+  DASHBOARD_WIDGET,
+  USE_DASHBOARD,
+  type IDashboardService,
+  type DashboardWidgetProps,
+  type UseDashboard,
 } from '@gaev/dashboard-contract';
 import { DashboardService } from './DashboardService';
 import { DashboardWidget } from './DashboardWidget';

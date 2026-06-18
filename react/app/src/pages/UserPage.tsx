@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { ComponentType } from 'react';
 import { resolveAsync } from '@gaev/container';
-import { USER_AVATAR, USER_SERVICE, type UserAvatarProps, type IUserService, type IUser } from '@gaev/user-contract';
+import {
+  USER_AVATAR,
+  USER_SERVICE,
+  type UserAvatarProps,
+  type IUserService,
+  type IUser
+} from '@gaev/user-contract';
 
 const [UserAvatar, userService] = await Promise.all([
   resolveAsync<ComponentType<UserAvatarProps>>(USER_AVATAR),

@@ -1,8 +1,12 @@
 import type { ComponentType } from 'react';
 import { container } from '@gaev/container';
 import {
-  CURRENCY_SERVICE, CURRENCY_INPUT, USE_CONVERSION,
-  type ICurrencyService, type CurrencyInputProps, type UseConversion,
+  CURRENCY_SERVICE,
+  CURRENCY_INPUT,
+  USE_CONVERSION,
+  type ICurrencyService,
+  type CurrencyInputProps,
+  type UseConversion,
 } from '@gaev/currency-contract';
 import { CurrencyService } from './CurrencyService';
 import CurrencyInput from './CurrencyInput';

@@ -1,4 +1,8 @@
-import { ICurrencyService, type IConversionResult, type CurrencyCode } from '@gaev/currency-contract';
+import {
+  type ICurrencyService,
+  type IConversionResult,
+  type CurrencyCode
+} from '@gaev/currency-contract';
 
 const rates: Record<string, number> = {
   'USD-EUR': 0.92, 'USD-GBP': 0.79, 'USD-JPY': 157.5,
@@ -7,7 +11,7 @@ const rates: Record<string, number> = {
   'JPY-USD': 0.0063, 'JPY-EUR': 0.0058, 'JPY-GBP': 0.005,
 };
 
-export class CurrencyService extends ICurrencyService {
+export class CurrencyService implements ICurrencyService {
   async convert(amount: number, from: CurrencyCode, to: CurrencyCode): Promise<IConversionResult> {
     const key = `${from}-${to}`;
     const rate = from === to ? 1 : (rates[key] ?? 1);

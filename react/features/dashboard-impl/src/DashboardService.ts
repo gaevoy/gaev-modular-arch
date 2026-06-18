@@ -1,6 +1,6 @@
-import { IDashboardService } from '@gaev/dashboard-contract';
+import type { IDashboardService } from '@gaev/dashboard-contract';
 
-export class DashboardService extends IDashboardService {
+export class DashboardService implements IDashboardService {
   async getSummary(): Promise<string> {
     return 'All systems operational';
   }

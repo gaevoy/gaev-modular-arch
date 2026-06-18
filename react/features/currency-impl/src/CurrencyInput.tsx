@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { container } from '@gaev/container';
-import { CURRENCY_SERVICE, type ICurrencyService, type IConversionResult, type CurrencyCode } from '@gaev/currency-contract';
-import type { CurrencyInputProps } from '@gaev/currency-contract';
+import {
+  CURRENCY_SERVICE,
+  type ICurrencyService,
+  type IConversionResult,
+  type CurrencyCode,
+  type CurrencyInputProps
+} from '@gaev/currency-contract';
 
 const currencies: CurrencyCode[] = ['USD', 'EUR', 'GBP', 'JPY'];
 

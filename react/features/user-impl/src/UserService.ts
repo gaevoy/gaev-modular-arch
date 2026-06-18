@@ -1,7 +1,9 @@
-import type { IUser } from '@gaev/user-contract';
-import { IUserService } from '@gaev/user-contract';
+import type {
+  IUser,
+  IUserService
+} from '@gaev/user-contract';
 
-export class UserService extends IUserService {
+export class UserService implements IUserService {
   async getCurrentUser(): Promise<IUser> {
     return {
       id: 'user-1',
