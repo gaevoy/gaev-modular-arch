@@ -1,0 +1,11 @@
+{
+  "name": "gaev-modular-arch-react",
+  "private": true,
+  "workspaces": ["container", "features/*", "app"],
+  "scripts": {
+    "dev": "npm run dev --workspace=app",
+    "build": "npm run build --workspace=app",
+    "typecheck": "tsc --build --verbose",
+    "serve": "npx serve app/dist"
+  }
+}
