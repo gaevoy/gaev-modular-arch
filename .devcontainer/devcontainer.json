@@ -3,7 +3,8 @@
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-24-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/dotnet:2": {
-			"version": "10"
+			"tabCompletions": true,
+			"version": "10.0"
 		}
 	}
 }
