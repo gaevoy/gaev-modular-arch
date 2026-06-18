@@ -36,3 +36,42 @@ However, the Code Patterns snippet for `container/src/index.ts` also starts with
 **Current state:** Both files import it, which works. The container's import is defensive (ensures the polyfill is present even if something imports `@gaev/container` before `main.tsx` runs), so there is a practical argument for keeping it there.
 
 **Plan fix:** Either remove `import 'reflect-metadata'` from the `container/src/index.ts` snippet and update the Key Decisions rationale, or update Key Decisions to say "imported in `container/src/index.ts`; no need to repeat in `main.tsx`" — and remove it from the `main.tsx` snippet.
+
+---
+
+## 3. Vite injects `<link rel="modulepreload">` for impl chunks in `index.html`
+
+**Symptom:** On the root page (no feature visited), `user-impl` loaded immediately. Initiator in DevTools: `(index):10` — meaning the preload came from a tag Vite injected directly into `index.html`.
+
+**Root cause:** Vite statically analyzes dynamic import strings in the source. Because `bootstrap.ts` contains `() => import('@gaev/user-impl')` as a literal string, Vite resolved the chunk and added a `<link rel="modulepreload">` for it. The browser fetches all modulepreload targets eagerly on page load — defeating lazy loading for impl chunks.
+
+**Fix applied:** Added `build.modulePreload.resolveDependencies` to `vite.config.ts` to strip impl chunks from the preload list:
+```ts
+modulePreload: {
+  resolveDependencies: (_url, deps) => deps.filter(dep => !dep.includes('-impl-')),
+},
+```
+
+**Why this is correct:** `vendor`, `container`, and `contracts` are always needed and benefit from being preloaded. Impl chunks are intentionally lazy — they should only load when `resolveAsync` is called for a symbol they own.
+
+---
+
+## 4. Removing `container` from `manualChunks` causes `user-impl` to load at startup
+
+**Symptom:** After removing the `container` rule from `manualChunks` (to fold it into the app bundle), `user-impl` still loaded on the root page. Initiator changed from `(index):10` (preload tag — issue #3) to `app-[hash].js:2` — meaning the app bundle itself was dynamically importing `user-impl`.
+
+**Root cause:** When `container` has no explicit `manualChunks` rule, Rollup's chunk splitting algorithm places the shared module (`@gaev/container` + inversify + reflect-metadata, ~52 kB) into the first dynamic chunk that wins in the split — in practice `user-impl`. The `app` entry chunk then has a cross-chunk import into `user-impl` to access `registerBundle`, which is needed at startup. This forces `user-impl` to load before the app can call `bootstrap()`.
+
+Confirmed by checking which built chunk contained the `Container` symbol:
+```
+app-*.js:       0 matches
+user-impl-*.js: 3 matches   ← inversify landed here
+```
+
+**Fix applied:** Restored an explicit `container` rule in `manualChunks`, pinning `@gaev/container`, inversify, and reflect-metadata together into a named `container` chunk that is always in the initial load:
+```ts
+if (id.includes('/container/src') || id.includes('node_modules/inversify') || id.includes('node_modules/reflect-metadata'))
+  return 'container';
+```
+
+**Why `container` must be a separate named chunk:** It is a shared static dependency of every impl package. Without a rule, Rollup picks an arbitrary dynamic chunk to host it. Naming it explicitly keeps it in the initial load group (preloaded alongside `vendor` and `contracts`) and keeps all impl chunks lightweight — `user-impl` dropped from ~53 kB back to ~0.8 kB once inversify was moved out.

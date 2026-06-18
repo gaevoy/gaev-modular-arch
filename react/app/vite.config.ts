@@ -19,13 +19,20 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
+    modulePreload: {
+      resolveDependencies: (_url, deps) => deps.filter(dep => !dep.includes('-impl-')),
+    },
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/app-[hash].js',
         manualChunks(id) {
           if (id.includes('-contract')) return 'contracts';
-          if (id.includes('/container/src')) return 'container';
+          if (id.includes('/container/src') || id.includes('node_modules/inversify') || id.includes('node_modules/reflect-metadata'))
+            return 'container';
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom'))
-            return 'vendor-react';
+            return 'vendor';
+          const impl = id.match(/\/([\w-]+-impl)\//)?.[1];
+          if (impl) return impl;
         },
       },
     },

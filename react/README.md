@@ -2,6 +2,8 @@
 
 Working demo of modular React architecture driven by the **Dependency Inversion Principle**. Features are isolated npm packages exposing typed contracts only; implementations are lazy-loaded Vite chunks registered with an IoC container at runtime.
 
+[Architecture plan](docs/PLAN.md) · [Implementation issues](docs/ISSUES.md)
+
 ---
 
 ## Overview
@@ -188,27 +190,41 @@ export default function DashboardPage() {
 
 ## Bundle Strategy
 
-Vite's `manualChunks` in `vite.config.ts` produces a predictable output:
+`app/vite.config.ts` controls how Rollup splits the output. Key settings beyond `manualChunks`:
+
+- **`build.target: 'es2022'`** — required for top-level `await`; Vite's esbuild target is independent of `tsconfig`.
+- **`entryFileNames: 'assets/app-[hash].js'`** — renames the entry chunk from the default `index-[hash].js`.
+- **`modulePreload.resolveDependencies`** — filters impl chunks out of the `<link rel="modulepreload">` tags Vite injects into `index.html`; without this, Vite eagerly fetches impl chunks on every page load, defeating lazy loading.
+- **Impl chunk naming** — a single regex rule `id.match(/\/([\w-]+-impl)\//)` gives every impl package a readable name automatically; new features get named correctly with no config change.
+
+### Chunks produced
 
 | Chunk | Contents | Loaded |
 |---|---|---|
-| `vendor-react` | react, react-dom | initial |
-| `container` | inversify + `@gaev/container` | initial |
+| `app` | entry: `main.tsx`, `bootstrap.ts`, `App.tsx` | initial |
+| `container` | `@gaev/container` + inversify + reflect-metadata | initial |
+| `vendor` | react, react-dom | initial |
 | `contracts` | all three `*-contract` packages | initial |
-| `index` | app bootstrap + router | initial |
 | `UserPage` | page module | on `/user` visit |
 | `CurrencyPage` | page module | on `/currency` visit |
 | `DashboardPage` | page module | on `/dashboard` visit |
-| user-impl | `UserService`, `UserAvatar`, `useCurrentUser` | on first user symbol resolve |
-| currency-impl | `CurrencyService`, `CurrencyInput`, `useConversion` | on first currency symbol resolve |
-| dashboard-impl | `DashboardWidget`, `DashboardService` + transitively user-impl + currency-impl | on `/dashboard` visit |
+| `user-impl` | `UserService`, `UserAvatar`, `useCurrentUser` | on first user symbol resolve |
+| `currency-impl` | `CurrencyService`, `CurrencyInput`, `useConversion` | on first currency symbol resolve |
+| `dashboard-impl` | `DashboardWidget`, `DashboardService` + transitively user-impl + currency-impl | on `/dashboard` visit |
 
-**DevTools Network walkthrough:** Open the Network tab, filter by JS, then navigate:
+### Why `container` must be a named chunk
 
-1. `/user` — triggers `UserPage` chunk, then user-impl chunk. `<Suspense>` fallback appears briefly.
-2. `/currency` — triggers `CurrencyPage` + currency-impl chunks.
-3. `/dashboard` — triggers `DashboardPage` + dashboard-impl + (if not cached) user-impl + currency-impl. All three impl chunks load in parallel.
-4. Hard-refresh on `/#/dashboard` — `HashRouter` keeps the route client-side; all required chunks load on arrival.
+`@gaev/container` (and the inversify + reflect-metadata it imports) is used by every impl package's `register.ts`. If `container` has no `manualChunks` rule, Rollup places it in whichever dynamic chunk first claims it in its split algorithm — in practice, `user-impl`. This causes the `app` entry to depend on `user-impl` at parse time to get the `registerBundle` export, loading the entire user feature on every page including routes that never use it. Pinning `container` to its own named chunk guarantees it stays in the initial load group where it belongs.
+
+### DevTools Network walkthrough
+
+Open the Network tab, filter by JS, then navigate:
+
+1. Root `/` — loads `app`, `container`, `vendor`, `contracts` in parallel (all preloaded via `<link rel="modulepreload">`).
+2. `/user` — triggers `UserPage` chunk, then `user-impl`. `<Suspense>` fallback appears briefly.
+3. `/currency` — triggers `CurrencyPage` + `currency-impl`.
+4. `/dashboard` — triggers `DashboardPage` + `dashboard-impl` + (if not cached) `user-impl` + `currency-impl` in parallel.
+5. Hard-refresh on `/#/dashboard` — `HashRouter` keeps the route client-side; all required chunks load on arrival.
 
 ---
 
