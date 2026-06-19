@@ -1,3 +1,6 @@
+// reflect-metadata polyfills Reflect.getMetadata/hasMetadata onto the global Reflect object.
+// inversify calls these unconditionally (even without @injectable decorators),
+// so this must be imported before any inversify code runs.
 import 'reflect-metadata';
 import { Container } from 'inversify';
 

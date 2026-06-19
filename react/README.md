@@ -47,11 +47,12 @@ Concrete code. Import their own contract + `@gaev/container`, implement everythi
 - Must never import another _impl_ package
 
 ### `@gaev/app`
-The React app. Imports contracts for types and symbols, never impl packages. Uses `React.lazy` + `Suspense` for page-level code splitting and top-level `await` in page modules for clean async injection.
+The React app. Imports contracts for types and symbols, never impl packages. Uses `React.lazy` + `Suspense` for page-level code splitting; each page component lives in its feature's impl package and is resolved directly from the container via `createLazyPage`.
 
 **Rules:**
 - Static imports: `@gaev/container`, all `*-contract` packages, React, react-router-dom
 - Dynamic imports (in `bootstrap.ts` only): all `*-impl` packages
+- No page files — `App.tsx` resolves pages directly: `createLazyPage(USER_PAGE)`
 
 ---
 
@@ -142,9 +143,10 @@ inversify bindings use `toDynamicValue` / `toConstantValue` — no decorators, n
 | Data interface | `interface IUser { id: string; name: string; avatarUrl: string; }` |
 | Service interface | `interface IUserService { getCurrentUser(): Promise<IUser>; }` |
 | Props interface | `interface UserAvatarProps { userId: string; size?: 'sm' \| 'md' \| 'lg'; }` |
+| Page props interface | `interface UserPageProps {}` |
 | Hook type | `type UseCurrentUser = () => { user: IUser \| null; loading: boolean }` |
 | IoC symbol | `const USER_SERVICE = Symbol.for('@gaev/user/USER_SERVICE')` |
-| Symbols array | `const USER_SYMBOLS: symbol[] = [USER_SERVICE, USER_AVATAR, USE_CURRENT_USER]` |
+| Symbols array | `const USER_SYMBOLS: symbol[] = [USER_SERVICE, USER_AVATAR, USE_CURRENT_USER, USER_PAGE]` |
 
 Contracts must never import React. Props interfaces are plain TypeScript — consumers that already import React compose `React.ComponentType<Props>` at their own call site:
 
@@ -163,25 +165,19 @@ const UserAvatar = await resolveAsync<ComponentType<UserAvatarProps>>(USER_AVATA
 
 ## Cross-Feature Injection Patterns
 
-### Top-level `await` in page modules
+### `createLazyPage` in `App.tsx`
 
-Pages are imported via `React.lazy(() => import('./pages/DashboardPage'))`. When a module with top-level `await` is dynamically imported, the Promise returned by `import()` resolves only after all top-level awaits complete. `React.lazy` waits on that Promise and shows the `<Suspense>` fallback during loading.
-
-By the time a page component function is first called by React, all resolved values are already available as module-level constants. No inner component, no `useState` for injected values.
+Page components live in their feature's impl package, not in the app. `App.tsx` resolves them directly from the container using a small helper:
 
 ```ts
-// UserPage.tsx — top-level await; runs before the component renders
-const [UserAvatar, userService] = await Promise.all([
-  resolveAsync<ComponentType<UserAvatarProps>>(USER_AVATAR),
-  resolveAsync<IUserService>(USER_SERVICE),
-]);
+const createLazyPage = (symbol: symbol) =>
+  React.lazy(async () => ({ default: await resolveAsync<ComponentType>(symbol) }));
 
-export default function UserPage() {
-  // UserAvatar and userService are guaranteed to be ready here
-}
+const UserPage = createLazyPage(USER_PAGE);
+const DashboardPage = createLazyPage(DASHBOARD_PAGE);
 ```
 
-Use `Promise.all` for parallel bundle loading whenever a page needs more than one symbol.
+`React.lazy` accepts any async function returning `{ default: ComponentType }`. `resolveAsync` triggers the bundle load if needed and returns the bound component. The `<Suspense>` fallback is shown while loading; by the time the component renders the impl chunk is fully initialised.
 
 ### Top-level `await` in impl modules (`DashboardWidget`)
 
@@ -198,14 +194,11 @@ const [UserAvatar, userService, currencyService] = await Promise.all([
 
 ### Hook injection in `DashboardPage`
 
-`DashboardPage` demonstrates cross-feature hook injection: `UseCurrentUser` is a hook type defined in `@gaev/user-contract`, bound by `@gaev/user-impl`, and resolved by `@gaev/app`. Because the hook is resolved via top-level `await` before the component renders, it can be called unconditionally at the top of the component — no Rules of Hooks violation, no conditional wrapper needed.
+`DashboardPage` lives in `@gaev/dashboard-impl` and demonstrates cross-feature hook injection: `UseCurrentUser` is a hook type defined in `@gaev/user-contract`, bound by `@gaev/user-impl`, and resolved inside the dashboard impl via top-level `await`. Because the hook is resolved before the component renders, it can be called unconditionally at the top of the component — no Rules of Hooks violation, no conditional wrapper needed.
 
 ```tsx
-// DashboardPage.tsx
-const [useCurrentUser, DashboardWidget] = await Promise.all([
-  resolveAsync<UseCurrentUser>(USE_CURRENT_USER),
-  resolveAsync<ComponentType<DashboardWidgetProps>>(DASHBOARD_WIDGET),
-]);
+// dashboard-impl/src/DashboardPage.tsx
+const useCurrentUser = await resolveAsync<UseCurrentUser>(USE_CURRENT_USER);
 
 export default function DashboardPage() {
   const { user } = useCurrentUser(); // hook from @gaev/user-contract — unconditional ✓
@@ -237,12 +230,9 @@ export default function DashboardPage() {
 | `container` | `@gaev/container` + inversify + reflect-metadata | initial |
 | `vendor` | react, react-dom | initial |
 | `contracts` | all three `*-contract` packages | initial |
-| `UserPage` | page module | on `/user` visit |
-| `CurrencyPage` | page module | on `/currency` visit |
-| `DashboardPage` | page module | on `/dashboard` visit |
-| `user-impl` | `UserService`, `UserAvatar`, `useCurrentUser` | on first user symbol resolve |
-| `currency-impl` | `CurrencyService`, `CurrencyInput`, `useConversion` | on first currency symbol resolve |
-| `dashboard-impl` | `DashboardWidget`, `DashboardService` + transitively user-impl + currency-impl | on `/dashboard` visit |
+| `user-impl` | `UserPage`, `UserService`, `UserAvatar`, `useCurrentUser` | on `/user` visit |
+| `currency-impl` | `CurrencyPage`, `CurrencyService`, `CurrencyInput`, `useConversion` | on `/currency` visit |
+| `dashboard-impl` | `DashboardPage`, `DashboardWidget`, `DashboardService` + transitively user-impl + currency-impl | on `/dashboard` visit |
 
 ### Why `container` must be a named chunk
 
@@ -253,9 +243,9 @@ export default function DashboardPage() {
 Open the Network tab, filter by JS, then navigate:
 
 1. Root `/` — loads `app`, `container`, `vendor`, `contracts` in parallel (all preloaded via `<link rel="modulepreload">`).
-2. `/user` — triggers `UserPage` chunk, then `user-impl`. `<Suspense>` fallback appears briefly.
-3. `/currency` — triggers `CurrencyPage` + `currency-impl`.
-4. `/dashboard` — triggers `DashboardPage` + `dashboard-impl` + (if not cached) `user-impl` + `currency-impl` in parallel.
+2. `/user` — `createLazyPage` fires → `resolveAsync(USER_PAGE)` → loads `user-impl`. `<Suspense>` fallback appears briefly.
+3. `/currency` — `resolveAsync(CURRENCY_PAGE)` → loads `currency-impl`.
+4. `/dashboard` — `resolveAsync(DASHBOARD_PAGE)` → loads `dashboard-impl` + (if not cached) `user-impl` + `currency-impl` in parallel.
 5. Hard-refresh on `/#/dashboard` — `HashRouter` keeps the route client-side; all required chunks load on arrival.
 
 ---
@@ -272,15 +262,14 @@ Open the Network tab, filter by JS, then navigate:
    registerBundle(MY_SYMBOLS, () => import('@gaev/my-feature-impl'));
    ```
 
-4. **Add a page in `app/src/pages/`** using top-level `await` to resolve what the page needs:
+4. **Add a page component to the impl** (`features/my-feature-impl/src/MyPage.tsx`) and bind it in `register.ts`:
    ```ts
-   const myComponent = await resolveAsync<ComponentType<MyProps>>(MY_COMPONENT);
-   export default function MyPage() { return <myComponent />; }
+   container.bind<ComponentType<MyPageProps>>(MY_PAGE).toConstantValue(MyPage);
    ```
 
 5. **Add a route in `App.tsx`:**
    ```tsx
-   const MyPage = React.lazy(() => import('./pages/MyPage'));
+   const MyPage = createLazyPage(MY_PAGE);
    // inside <Routes>:
    <Route path="/my-feature" element={<MyPage />} />
    ```

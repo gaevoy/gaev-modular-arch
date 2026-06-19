@@ -1,9 +1,18 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, type ComponentType } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { resolveAsync } from '@gaev/container';
+import { USER_PAGE } from '@gaev/user-contract';
+import { CURRENCY_PAGE } from '@gaev/currency-contract';
+import { DASHBOARD_PAGE } from '@gaev/dashboard-contract';
 
-const UserPage = React.lazy(() => import('./pages/UserPage'));
-const CurrencyPage = React.lazy(() => import('./pages/CurrencyPage'));
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const createLazyPage = (symbol: symbol) =>
+  React.lazy(async () => ({
+    default: await resolveAsync<ComponentType>(symbol)
+  }));
+
+const UserPage = createLazyPage(USER_PAGE);
+const CurrencyPage = createLazyPage(CURRENCY_PAGE);
+const DashboardPage = createLazyPage(DASHBOARD_PAGE);
 
 export default function App() {
   return (
