@@ -93,6 +93,54 @@ Both implementations use the same three features:
 
 ---
 
+## Dependency Graph
+
+```mermaid
+flowchart BT
+    HOST["Host"]
+
+    subgraph user["User Feature"]
+        UC["Contract"]
+        UI["Impl"]
+    end
+
+    subgraph dashboard["Dashboard Feature"]
+        DC["Contract"]
+        DI["Impl"]
+    end
+
+    subgraph currency["Currency Feature"]
+        CC["Contract"]
+        CI["Impl"]
+    end
+
+    UI --> UC
+    CI --> CC
+    DI --> DC
+    DI --> UC
+    DI --> CC
+
+    HOST --> UI
+    HOST --> CI
+    HOST --> DI
+
+    classDef contracts fill:#1a3a5c,stroke:#5b9bd5,color:#cce5ff
+    classDef impl fill:#2a3a1a,stroke:#7daf3d,color:#d5f0b0
+    classDef host fill:#3a1a1a,stroke:#d54b4b,color:#ffd5d5
+
+    class UC,CC,DC contracts
+    class UI,CI,DI impl
+    class HOST host
+
+    style user fill:none,stroke:#888,stroke-dasharray:5 5
+    style currency fill:none,stroke:#888,stroke-dasharray:5 5
+    style dashboard fill:none,stroke:#888,stroke-dasharray:5 5
+```
+
+**Legend:** blue — Contract (interfaces, types & symbols) &nbsp;·&nbsp; green — Impl (services, components, hooks) &nbsp;·&nbsp; red — Host (wiring)
+
+---
+
 ## Repo Layout
 
 ```

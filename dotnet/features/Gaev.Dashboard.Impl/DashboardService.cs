@@ -4,7 +4,7 @@ using Gaev.User.Contracts;
 
 namespace Gaev.Dashboard.Impl;
 
-public sealed class DashboardService : IDashboardService
+internal sealed class DashboardService : IDashboardService
 {
     private readonly IUserService _users;
     private readonly ICurrencyService _currency;

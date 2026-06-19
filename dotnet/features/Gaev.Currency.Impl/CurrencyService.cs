@@ -2,7 +2,7 @@ using Gaev.Currency.Contracts;
 
 namespace Gaev.Currency.Impl;
 
-public sealed class CurrencyService : ICurrencyService
+internal sealed class CurrencyService : ICurrencyService
 {
     private static readonly Dictionary<(string, string), decimal> Rates = new()
     {

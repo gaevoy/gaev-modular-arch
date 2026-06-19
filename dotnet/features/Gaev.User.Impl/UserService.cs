@@ -2,7 +2,7 @@ using Gaev.User.Contracts;
 
 namespace Gaev.User.Impl;
 
-public sealed class UserService : IUserService
+internal sealed class UserService : IUserService
 {
     private readonly Dictionary<Guid, UserDto> _store = new();
 

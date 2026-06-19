@@ -4,6 +4,8 @@ Working demo of modular React architecture driven by the **Dependency Inversion 
 
 [Architecture plan](docs/PLAN.md) · [Implementation issues](docs/ISSUES.md)
 
+> **This is a demo project.** The goal is to illustrate architectural principles with minimal noise. Dependencies are kept to the bare minimum intentionally — no Nx, no Turborepo, no Rush, no Lerna, no monorepo tooling layer of any kind, no unit tests. npm workspaces + Vite are sufficient to demonstrate the pattern without introducing tools whose configuration would obscure the architecture itself.
+
 ---
 
 ## Overview
@@ -55,19 +57,49 @@ The React app. Imports contracts for types and symbols, never impl packages. Use
 
 ## Dependency Graph
 
-```
-@gaev/container              (no @gaev/* deps)
-       ↑
-       ├── @gaev/user-impl          → @gaev/user-contract
-       ├── @gaev/currency-impl      → @gaev/currency-contract
-       └── @gaev/dashboard-impl     → @gaev/dashboard-contract
-                                       + @gaev/user-contract     (symbols + types)
-                                       + @gaev/currency-contract (symbols + types)
+```mermaid
+flowchart BT
+    APP["@gaev/app"]
 
-@gaev/app → @gaev/container + all 3 contracts
-            never imports impl packages statically
-            (dynamic import only, inside bootstrap.ts)
+    subgraph user["User Feature"]
+        UC["@gaev/user-contract"]
+        UI["@gaev/user-impl"]
+    end
+
+    subgraph dashboard["Dashboard Feature"]
+        DC["@gaev/dashboard-contract"]
+        DI["@gaev/dashboard-impl"]
+    end
+
+    subgraph currency["Currency Feature"]
+        CC["@gaev/currency-contract"]
+        CI["@gaev/currency-impl"]
+    end
+
+    UI --> UC
+    CI --> CC
+    DI --> DC
+    DI --> UC
+    DI --> CC
+
+    APP --> UI
+    APP --> CI
+    APP --> DI
+
+    classDef contracts fill:#1a3a5c,stroke:#5b9bd5,color:#cce5ff
+    classDef impl fill:#2a3a1a,stroke:#7daf3d,color:#d5f0b0
+    classDef app fill:#3a1a1a,stroke:#d54b4b,color:#ffd5d5
+
+    class UC,CC,DC contracts
+    class UI,CI,DI impl
+    class APP app
+
+    style user fill:none,stroke:#888,stroke-dasharray:5 5
+    style currency fill:none,stroke:#888,stroke-dasharray:5 5
+    style dashboard fill:none,stroke:#888,stroke-dasharray:5 5
 ```
+
+**Legend:** blue — Contract (interfaces, types, symbols) &nbsp;·&nbsp; green — Impl (services, components, hooks) &nbsp;·&nbsp; red — App (wiring)
 
 ---
 
