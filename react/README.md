@@ -148,14 +148,14 @@ inversify bindings use `toDynamicValue` / `toConstantValue` — no decorators, n
 | IoC symbol | `const USER_SERVICE = Symbol.for('@gaev/user/USER_SERVICE')` |
 | Symbols array | `const USER_SYMBOLS: symbol[] = [USER_SERVICE, USER_AVATAR, USE_CURRENT_USER, USER_PAGE]` |
 
-Contracts must never import React. Props interfaces are plain TypeScript — consumers that already import React compose `React.ComponentType<Props>` at their own call site:
+Contracts must never import React. Props interfaces are plain TypeScript — impl packages that already import React compose `React.ComponentType<Props>` at their own call site:
 
 ```ts
 // contract — plain props, no React
 export interface UserAvatarProps { userId: string; size?: 'sm' | 'md' | 'lg'; }
 export const USER_AVATAR = Symbol.for('@gaev/user/USER_AVATAR');
 
-// consumer — React type added here, already imports React
+// impl package — React type added here
 import type { ComponentType } from 'react';
 import { USER_AVATAR, type UserAvatarProps } from '@gaev/user-contract';
 const UserAvatar = await resolveAsync<ComponentType<UserAvatarProps>>(USER_AVATAR);
@@ -181,7 +181,7 @@ const DashboardPage = createLazyPage(DASHBOARD_PAGE);
 
 ### Top-level `await` in impl modules (`DashboardWidget`)
 
-The same pattern works inside impl packages. `DashboardWidget.tsx` has its own top-level awaits that load user-impl and currency-impl in parallel. Because `register.ts` imports `DashboardWidget`, the entire dashboard-impl bundle is async — its loader Promise (`entry.loading` in the container) won't resolve until `DashboardWidget`'s top-level awaits complete, which means user-impl and currency-impl are also loaded. All three impl chunks load in parallel behind a single `<Suspense>` fallback.
+The same pattern works inside impl packages. Both `DashboardWidget.tsx` and `DashboardPage.tsx` have top-level awaits that trigger cross-feature bundle loads. Because `register.ts` imports both, the entire dashboard-impl bundle is async — its loader Promise (`entry.loading` in the container) won't resolve until all top-level awaits in those modules complete, which means user-impl and currency-impl are fully loaded too. All three impl chunks load in parallel behind a single `<Suspense>` fallback.
 
 ```ts
 // DashboardWidget.tsx — runs at dashboard-impl bundle init time
@@ -252,7 +252,7 @@ Open the Network tab, filter by JS, then navigate:
 
 ## How to Add a New Feature
 
-1. **Create `features/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../tsconfig.base.json`, and `src/` with service interfaces, props types, a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`.
+1. **Create `features/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../tsconfig.base.json`, and `src/` with service interfaces, props types (including `MyPageProps` and the page symbol `MY_PAGE`), a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`, including `MY_PAGE`.
 
 2. **Create `features/my-feature-impl/`** — add `package.json` (deps: `@gaev/container`, `@gaev/my-feature-contract`, `react`), `tsconfig.json`, and `src/` with concrete implementations. Write `register.ts` that calls `container.bind(...)` for each symbol. Write `index.ts` with a single `import './register'`.
 
