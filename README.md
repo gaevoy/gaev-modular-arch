@@ -1,6 +1,6 @@
 # Modular Architecture Demo
 
-The same architectural pattern — **feature isolation via contract/impl split and an IoC container** — implemented in two ecosystems side by side.
+The same architectural pattern — **[Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)** (feature isolation via contract/impl split and an IoC container) — implemented in two ecosystems side by side.
 
 | | React | .NET |
 |---|---|---|

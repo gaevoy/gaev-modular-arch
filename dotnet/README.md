@@ -1,6 +1,6 @@
 # .NET 10 Modular Architecture Demo
 
-A demonstration of the **Dependency Inversion Principle applied at the assembly level** — the same architectural idea as the React version (npm workspaces + barrel bundles), but expressed through .NET projects and ASP.NET Core's built-in DI container.
+A demonstration of the **[Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle) applied at the assembly level** — the same architectural idea as the React version (npm workspaces + barrel bundles), but expressed through .NET projects and ASP.NET Core's built-in DI container.
 
 > **This is a demo project.** The goal is to illustrate architectural principles with minimal noise. Dependencies are kept to the bare minimum intentionally — no unit tests, no MediatR, no FluentValidation, no AutoMapper, no Serilog/Seq, no OpenTelemetry, no EF Core, no Polly. The built-in ASP.NET Core DI and minimal APIs are sufficient to demonstrate the pattern without introducing libraries whose setup would obscure the architecture itself.
 

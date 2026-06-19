@@ -1,6 +1,6 @@
 # Modular Architecture Demo — React + npm Workspaces + Vite + inversify
 
-Working demo of modular React architecture driven by the **Dependency Inversion Principle**. Features are isolated npm packages exposing typed contracts only; implementations are lazy-loaded Vite chunks registered with an IoC container at runtime.
+Working demo of modular React architecture driven by the **[Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)**. Features are isolated npm packages exposing typed contracts only; implementations are lazy-loaded Vite chunks registered with an IoC container at runtime.
 
 [Architecture plan](docs/PLAN.md) · [Implementation issues](docs/ISSUES.md)
 
@@ -103,7 +103,7 @@ flowchart BT
 
 ---
 
-## Dependency Inversion Principle
+## [Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)
 
 > High-level modules should not depend on low-level modules. Both should depend on abstractions.
 
