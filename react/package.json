@@ -1,11 +1,17 @@
 {
   "name": "gaev-modular-arch-react",
   "private": true,
+  "type": "module",
   "workspaces": ["container", "features/*", "app"],
   "scripts": {
     "dev": "npm run dev --workspace=app",
     "build": "npm run build --workspace=app",
     "typecheck": "tsc --build --verbose",
-    "serve": "npx serve app/dist"
+    "serve": "npx serve app/dist",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0"
   }
 }

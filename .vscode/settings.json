@@ -1,0 +1,8 @@
+{
+  // Without this, the ESLint extension CWDs from the workspace root and uses LegacyConfigLoader,
+  // which cannot find react/eslint.config.js and errors on every file. changeProcessCWD: true
+  // makes the extension chdir into react/ so ESLint picks up the flat config correctly.
+  "eslint.workingDirectories": [
+    { "directory": "react", "changeProcessCWD": true }
+  ]
+}

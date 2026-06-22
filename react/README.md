@@ -2,7 +2,7 @@
 
 Working demo of modular React architecture driven by the **[Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)**. Features are isolated npm packages exposing typed contracts only; implementations are lazy-loaded Vite chunks registered with an IoC container at runtime.
 
-[Architecture plan](docs/PLAN.md) · [Implementation issues](docs/ISSUES.md)
+[Architecture plan](docs/plans/Modular Architecture Demo.md) · [Implementation issues](docs/ISSUES.md)
 
 > **This is a demo project.** The goal is to illustrate architectural principles with minimal noise. Dependencies are kept to the bare minimum intentionally — no Nx, no Turborepo, no Rush, no Lerna, no monorepo tooling layer of any kind, no unit tests. npm workspaces + Vite are sufficient to demonstrate the pattern without introducing tools whose configuration would obscure the architecture itself.
 
@@ -23,36 +23,48 @@ The result is a codebase where adding, swapping, or removing a feature touches o
 ## Package Types
 
 ### `@gaev/container`
-The IoC container. Wraps inversify's `Container` and adds two functions: `registerBundle` (called at startup to declare which symbols a lazy chunk owns) and `resolveAsync` (called at use-time to trigger loading and retrieve a binding). No React dependency.
+The IoC container. Wraps inversify's `Container` and adds two functions: `registerBundle` (called at startup to declare which symbols a lazy chunk owns) and `resolveAsync` (called at use-time to trigger loading and retrieve a binding).
 
-**Rules:**
-- No `@gaev/*` feature dependencies
-- No React
-- Exported API surface: `container`, `registerBundle`, `resolveAsync`, `injectable`, `inject`
+| Rule | ID |
+|---|---|
+| No `@gaev/*` feature imports | `ARCH_CTR_1` |
+| No React imports | `ARCH_CTR_2` |
+
+Exported API surface: `container`, `registerBundle`, `resolveAsync`, `injectable`, `inject`
 
 ### Contract packages (`*-contract`)
 Pure TypeScript. Define what a feature _is_ — service interfaces, props interfaces, hook types, and IoC symbols. Nothing else.
 
-**Rules:**
-- Zero `@gaev/*` dependencies
-- Zero React imports of any kind (not even as a `devDependency` type import)
-- No implementation logic
+| Rule | ID |
+|---|---|
+| No `@gaev/*` imports | `ARCH_CON_1` |
+| No React imports of any kind (including `import type`) | `ARCH_CON_2` |
+| No classes | `ARCH_CON_3` |
+| No function declarations | `ARCH_CON_4` |
 
 ### Implementation packages (`*-impl`)
-Concrete code. Import their own contract + `@gaev/container`, implement everything, and call `container.bind(...)` in `register.ts`. The package entry point (`index.ts`) is a single line: `import './register'`.
+Concrete code. Import their own contract + `@gaev/container`, implement everything, and call `container.bind(...)` in `register.ts`. The package entry point (`index.ts`) is a single line: `import './register'`. Consumers never reference the impl directly — they resolve it from the container using contract symbols: `resolveAsync<IUserService>(USER_SERVICE)`.
 
-**Rules:**
-- Must not be imported statically by `@gaev/app` — only via `() => import('@gaev/...-impl')` in `bootstrap.ts`
-- May import other _contract_ packages for cross-feature types and symbols
-- Must never import another _impl_ package
+| Rule | ID |
+|---|---|
+| May statically import any contract package | — |
+| No imports from another impl package | `ARCH_IMP_1` |
+| `index.ts` must not export anything | `ARCH_IMP_2` |
+| `register.ts` must not export anything | `ARCH_IMP_3` |
 
 ### `@gaev/app`
 The React app. Imports contracts for types and symbols, never impl packages. Uses `React.lazy` + `Suspense` for page-level code splitting; each page component lives in its feature's impl package and is resolved directly from the container via `createLazyPage`.
 
-**Rules:**
-- Static imports: `@gaev/container`, all `*-contract` packages, React, react-router-dom
-- Dynamic imports (in `bootstrap.ts` only): all `*-impl` packages
-- No page files — `App.tsx` resolves pages directly: `createLazyPage(USER_PAGE)`
+| Rule | ID |
+|---|---|
+| No static impl imports (`@gaev/container` and `*-contract` packages are allowed) | `ARCH_APP_1` |
+| Dynamic impl imports only in `bootstrap.ts` | `ARCH_APP_2` |
+
+No page files — `App.tsx` resolves pages directly: `createLazyPage(USER_PAGE)`
+
+### Automated enforcement
+
+All rules above are enforced by `eslint.config.js` using only built-in ESLint rules (`no-restricted-imports`, `no-restricted-syntax`) — no plugins. The `ARCH_*` tags on each rule are ESLint constraint IDs; they appear verbatim in editor error messages so violations are easy to trace back to the rule. Run `npm run lint` to check. See [ESLint Architectural Constraint Linter](docs/plans/ESLint%20Architectural%20Constraint%20Linter.md) for the full rule mapping and verification steps.
 
 ---
 
@@ -288,6 +300,7 @@ npm install          # install all workspace deps + create @gaev/* symlinks
 npm run dev          # start Vite dev server (default: http://localhost:5173)
 npm run build        # production build → app/dist/
 npm run typecheck    # tsc --build across all packages
+npm run lint         # ESLint architectural constraint checks
 ```
 
 Navigate to `/#/user`, `/#/currency`, or `/#/dashboard`. Each page loads its own impl chunk on first visit. Hard-refresh (`F5`) on any route works correctly via `HashRouter`.
