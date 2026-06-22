@@ -1,10 +1,10 @@
 import tseslint from 'typescript-eslint';
 
 const CONTAINER_FILES = 'container/src/**/*.ts';
-const CONTRACT_FILES  = 'features/*-contract/src/**/*.ts';
-const IMPL_FILES      = 'features/*-impl/src/**/*.{ts,tsx}';
-const IMPL_INDEX      = 'features/*-impl/src/index.ts';
-const IMPL_REGISTER   = 'features/*-impl/src/register.ts';
+const CONTRACT_FILES  = 'features/*/*-contract/src/**/*.ts';
+const IMPL_FILES      = 'features/*/*-impl/src/**/*.{ts,tsx}';
+const IMPL_INDEX      = 'features/*/*-impl/src/index.ts';
+const IMPL_REGISTER   = 'features/*/*-impl/src/register.ts';
 const APP_FILES       = 'app/src/**/*.{ts,tsx}';
 const APP_BOOTSTRAP   = 'app/src/bootstrap.ts';
 

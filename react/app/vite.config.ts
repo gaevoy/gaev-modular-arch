@@ -9,12 +9,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@gaev/container':          r('../container/src/index.ts'),
-      '@gaev/user-contract':      r('../features/user-contract/src/index.ts'),
-      '@gaev/currency-contract':  r('../features/currency-contract/src/index.ts'),
-      '@gaev/dashboard-contract': r('../features/dashboard-contract/src/index.ts'),
-      '@gaev/user-impl':          r('../features/user-impl/src/index.ts'),
-      '@gaev/currency-impl':      r('../features/currency-impl/src/index.ts'),
-      '@gaev/dashboard-impl':     r('../features/dashboard-impl/src/index.ts'),
+      '@gaev/user-contract':      r('../features/user/user-contract/src/index.ts'),
+      '@gaev/currency-contract':  r('../features/currency/currency-contract/src/index.ts'),
+      '@gaev/dashboard-contract': r('../features/dashboard/dashboard-contract/src/index.ts'),
+      '@gaev/user-impl':          r('../features/user/user-impl/src/index.ts'),
+      '@gaev/currency-impl':      r('../features/currency/currency-impl/src/index.ts'),
+      '@gaev/dashboard-impl':     r('../features/dashboard/dashboard-impl/src/index.ts'),
     },
   },
   build: {

@@ -262,11 +262,23 @@ Open the Network tab, filter by JS, then navigate:
 
 ---
 
+## Features
+
+Each feature is a named subfolder under `features/` that contains its contract package, impl package, and README. The subfolder is the ownership and discoverability unit — everything belonging to a feature lives there.
+
+| Feature | Description |
+|---|---|
+| [User](features/user/README.md) | User identity — current user lookup, avatar display |
+| [Currency](features/currency/README.md) | Currency conversion input and service |
+| [Dashboard](features/dashboard/README.md) | Cross-feature summary (user + currency) |
+
+---
+
 ## How to Add a New Feature
 
-1. **Create `features/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../tsconfig.base.json`, and `src/` with service interfaces, props types (including `MyPageProps` and the page symbol `MY_PAGE`), a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`, including `MY_PAGE`.
+1. **Create `features/my-feature/my-feature-contract/`** — add `package.json` (`name: @gaev/my-feature-contract`, no deps), `tsconfig.json` extending `../../../tsconfig.base.json`, and `src/` with service interfaces, props types (including `MyPageProps` and the page symbol `MY_PAGE`), a hook type, symbols, and `index.ts` re-exporting everything. Add `MY_SYMBOLS: symbol[]` to `symbols.ts`, including `MY_PAGE`.
 
-2. **Create `features/my-feature-impl/`** — add `package.json` (deps: `@gaev/container`, `@gaev/my-feature-contract`, `react`), `tsconfig.json`, and `src/` with concrete implementations. Write `register.ts` that calls `container.bind(...)` for each symbol. Write `index.ts` with a single `import './register'`.
+2. **Create `features/my-feature/my-feature-impl/`** — add `package.json` (deps: `@gaev/container`, `@gaev/my-feature-contract`, `react`), `tsconfig.json` extending `../../../tsconfig.base.json`, and `src/` with concrete implementations. Write `register.ts` that calls `container.bind(...)` for each symbol. Write `index.ts` with a single `import './register'`.
 
 3. **Register the bundle in `app/src/bootstrap.ts`:**
    ```ts
