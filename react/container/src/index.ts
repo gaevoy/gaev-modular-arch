@@ -10,37 +10,34 @@ type BundleLoader = () => Promise<unknown>;
 interface BundleEntry {
   symbols: symbol[];
   loader: BundleLoader;
-  loaded: boolean;
-  loading: Promise<void> | null;
+  loading?: Promise<unknown>;
 }
 const bundles: BundleEntry[] = [];
 
 /**
- * Declares that `symbols` belong to a lazy chunk loaded by `loader`.
- * Call once per feature in `bootstrap.ts` before any `resolveAsync` call.
+ * Registers a lazy bundle. Call once per feature before any `resolveAsync` call.
  *
  * @param symbols - All IoC symbols exported by the feature's contract package (e.g. `USER_SYMBOLS`).
- * @param loader  - Dynamic import factory that loads the impl package (e.g. `() => import('@gaev/user-impl')`).
+ * @param loader  - Dynamic import that registers bindings as a side-effect (e.g. `() => import('@gaev/user-impl')`).
  */
 export function registerBundle(symbols: symbol[], loader: BundleLoader): void {
-  bundles.push({ symbols, loader, loaded: false, loading: null });
+  bundles.push({ symbols, loader });
 }
 
 /**
- * Loads the bundle that owns `symbol` (if not yet loaded), then returns its container binding.
+ * Ensures the bundle that owns `symbol` is loaded, then resolves its container binding.
  * Concurrent calls for the same bundle share one in-flight `Promise` — the chunk is fetched only once.
- * Use `Promise.all` to load multiple symbols from different bundles in parallel.
+ * Once loaded, the stored `Promise` acts as the loaded marker so subsequent calls skip the fetch.
+ * Use `Promise.all` to load symbols from different bundles in parallel.
  *
  * @param symbol - IoC symbol from a `*-contract` package (e.g. `USER_SERVICE`).
  * @returns The bound value cast to `T`.
  */
 export async function resolveAsync<T>(symbol: symbol): Promise<T> {
-  const entry = bundles.find((b) => b.symbols.includes(symbol));
-  if (entry && !entry.loaded) {
-    if (!entry.loading) {
-      entry.loading = entry.loader().then(() => { entry.loaded = true; entry.loading = null; });
-    }
-    await entry.loading;
+  const bundle = bundles.find((b) => b.symbols.includes(symbol));
+  if (bundle) {
+    bundle.loading ??= bundle.loader();
+    await bundle.loading;
   }
   return container.get<T>(symbol);
 }
