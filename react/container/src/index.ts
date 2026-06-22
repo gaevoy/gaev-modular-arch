@@ -8,11 +8,10 @@ const container = new Container({ defaultScope: 'Singleton' });
 
 type BundleLoader = () => Promise<unknown>;
 interface BundleEntry {
-  symbols: symbol[];
   loader: BundleLoader;
   loading?: Promise<unknown>;
 }
-const bundles: BundleEntry[] = [];
+const bundles = new Map<symbol, BundleEntry>();
 
 /**
  * Registers a lazy bundle. Call once per feature before any `resolveAsync` call.
@@ -21,7 +20,8 @@ const bundles: BundleEntry[] = [];
  * @param loader  - Dynamic import that registers bindings as a side-effect (e.g. `() => import('@gaev/user-impl')`).
  */
 export function registerBundle(symbols: symbol[], loader: BundleLoader): void {
-  bundles.push({ symbols, loader });
+  const bundle = { loader };
+  symbols.forEach((s) => bundles.set(s, bundle));
 }
 
 /**
@@ -34,7 +34,7 @@ export function registerBundle(symbols: symbol[], loader: BundleLoader): void {
  * @returns The bound value cast to `T`.
  */
 export async function resolveAsync<T>(symbol: symbol): Promise<T> {
-  const bundle = bundles.find((b) => b.symbols.includes(symbol));
+  const bundle = bundles.get(symbol);
   if (bundle) {
     bundle.loading ??= bundle.loader();
     await bundle.loading;
