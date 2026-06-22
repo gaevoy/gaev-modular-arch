@@ -2,7 +2,7 @@
 
 Provides current-user identity — fetching the logged-in user's profile and exposing it as a component, a hook, and a service through the IoC container.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Packages
 

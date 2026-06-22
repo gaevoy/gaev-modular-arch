@@ -2,7 +2,7 @@
 
 Manages users — creating new users and looking them up by ID or listing all.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Key Interfaces
 

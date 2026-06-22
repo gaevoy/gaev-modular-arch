@@ -2,7 +2,7 @@
 
 Provides a cross-feature summary combining user count and a sample currency conversion. Demonstrates how an impl project can depend on other features' contracts without importing their implementations.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Key Interfaces
 

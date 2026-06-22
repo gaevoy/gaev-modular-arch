@@ -2,7 +2,7 @@
 
 Provides currency conversion — a user-facing input component, a conversion hook, and an underlying service, all exposed through the IoC container.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Packages
 

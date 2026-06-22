@@ -2,7 +2,7 @@
 
 Performs currency conversion between supported currency codes using fixed exchange rates.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Key Interfaces
 

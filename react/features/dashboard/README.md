@@ -2,7 +2,7 @@
 
 Provides a cross-feature summary page that composes the User and Currency features — displaying the current user and a currency conversion widget side by side. Demonstrates top-level `await` bundle loading and cross-feature hook injection.
 
-**Owner:** TBD
+**Owner:** John Doe
 
 ## Packages
 
