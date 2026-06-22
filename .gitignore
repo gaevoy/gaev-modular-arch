@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 **/bin
 **/obj
 *.user
+**/.idea/

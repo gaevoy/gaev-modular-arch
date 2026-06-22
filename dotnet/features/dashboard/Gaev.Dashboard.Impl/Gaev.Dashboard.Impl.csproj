@@ -2,8 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gaev.Dashboard.Contracts\Gaev.Dashboard.Contracts.csproj" />
-    <ProjectReference Include="..\Gaev.User.Contracts\Gaev.User.Contracts.csproj" />
-    <ProjectReference Include="..\Gaev.Currency.Contracts\Gaev.Currency.Contracts.csproj" />
+    <ProjectReference Include="..\..\user\Gaev.User.Contracts\Gaev.User.Contracts.csproj" />
+    <ProjectReference Include="..\..\currency\Gaev.Currency.Contracts\Gaev.Currency.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

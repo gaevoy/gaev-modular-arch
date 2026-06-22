@@ -131,13 +131,23 @@ internal sealed class DashboardService : IDashboardService
 
 At runtime ASP.NET Core's DI container resolves the concrete `UserService` and `CurrencyService` and injects them automatically. `DashboardService` never imports `Gaev.User.Impl` or `Gaev.Currency.Impl`.
 
+## Features
+
+Each feature lives in its own subfolder under `features/` — that folder is the feature boundary. Ownership is tangible (one folder = one owner), discoverability is straightforward (no guessing where a feature's docs live), and future additions (tests, ADRs, architecture diagrams, `CLAUDE.md`) have a natural home without a per-file naming decision.
+
+| Feature | Description |
+|---|---|
+| [User](features/user/README.md) | User management — create and look up users |
+| [Currency](features/currency/README.md) | Currency conversion |
+| [Dashboard](features/dashboard/README.md) | Cross-feature summary (user count + sample conversion) |
+
 ## How to Add a New Feature
 
-1. Create contracts project: `dotnet new classlib -n Gaev.MyFeature.Contracts -o features/Gaev.MyFeature.Contracts --framework net10.0`
+1. Create contracts project: `dotnet new classlib -n Gaev.MyFeature.Contracts -o features/myfeature/Gaev.MyFeature.Contracts --framework net10.0`
 2. Add interface and DTO files; delete `Class1.cs`.
-3. Create impl project: `dotnet new classlib -n Gaev.MyFeature.Impl -o features/Gaev.MyFeature.Impl --framework net10.0`
+3. Create impl project: `dotnet new classlib -n Gaev.MyFeature.Impl -o features/myfeature/Gaev.MyFeature.Impl --framework net10.0`
 4. Add `<FrameworkReference Include="Microsoft.AspNetCore.App" />` to the impl `.csproj`.
-5. Add reference to own contracts: `dotnet add features/Gaev.MyFeature.Impl reference features/Gaev.MyFeature.Contracts`
+5. Add reference to own contracts: `dotnet add features/myfeature/Gaev.MyFeature.Impl reference features/myfeature/Gaev.MyFeature.Contracts`
 6. Add references to any other contracts your impl needs (never another impl).
 7. Implement the interface as `internal sealed class` (see note below).
 8. Add `RegistrationExtensions.cs` with `AddMyFeature()` and `UseMyFeature()`.

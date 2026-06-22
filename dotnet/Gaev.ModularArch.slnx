@@ -1,11 +1,19 @@
 <Solution>
-  <Folder Name="/features/">
-    <Project Path="features/Gaev.Currency.Contracts/Gaev.Currency.Contracts.csproj" />
-    <Project Path="features/Gaev.Currency.Impl/Gaev.Currency.Impl.csproj" />
-    <Project Path="features/Gaev.Dashboard.Contracts/Gaev.Dashboard.Contracts.csproj" />
-    <Project Path="features/Gaev.Dashboard.Impl/Gaev.Dashboard.Impl.csproj" />
-    <Project Path="features/Gaev.User.Contracts/Gaev.User.Contracts.csproj" />
-    <Project Path="features/Gaev.User.Impl/Gaev.User.Impl.csproj" />
+  <Folder Name="/features/" />
+  <Folder Name="/features/currency/">
+    <File Path="features/currency/README.md" />
+    <Project Path="features/currency/Gaev.Currency.Contracts/Gaev.Currency.Contracts.csproj" />
+    <Project Path="features/currency/Gaev.Currency.Impl/Gaev.Currency.Impl.csproj" />
+  </Folder>
+  <Folder Name="/features/dashboard/">
+    <File Path="features/dashboard/README.md" />
+    <Project Path="features/dashboard/Gaev.Dashboard.Contracts/Gaev.Dashboard.Contracts.csproj" />
+    <Project Path="features/dashboard/Gaev.Dashboard.Impl/Gaev.Dashboard.Impl.csproj" />
+  </Folder>
+  <Folder Name="/features/user/">
+    <File Path="features/user/README.md" />
+    <Project Path="features/user/Gaev.User.Contracts/Gaev.User.Contracts.csproj" />
+    <Project Path="features/user/Gaev.User.Impl/Gaev.User.Impl.csproj" />
   </Folder>
   <Project Path="Gaev.Host/Gaev.Host.csproj" />
 </Solution>
